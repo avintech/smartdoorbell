@@ -21,7 +21,7 @@
  <li>Conduct thorough testing under different conditions, such as varying lighting conditions and different faces, to ensure reliability and robustness.</li>
 </ul>
 
-<h2>Installation</h2>
+<h2>Installation on Pi400</h2>
 <p>Activate python environment</p>
 <pre><code>source <yourenvname>/bin/activate</code></pre>
 
