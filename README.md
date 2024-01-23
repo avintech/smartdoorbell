@@ -31,7 +31,7 @@
 
 <p>Run the following commands to install the required packages:</p>
 <pre><code>pip install --upgrade pip
-pip install numpy Pillow opencv-python-headless pycryptodome hashlib pickle io
+pip install numpy Pillow opencv-python-headless pycryptodome io
 </code></pre>
 
 <h2>Running</h2>
