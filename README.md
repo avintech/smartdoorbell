@@ -38,7 +38,7 @@
 <p>Run the following commands to install the required packages:</p>
 <pre><code>sudo apt-get update
 pip install --upgrade pip
-pip install numpy Pillow opencv-python-headless pycryptodome opencv-contrib-python
+pip install numpy Pillow opencv-python-headless pycryptodome opencv-contrib-python pyrebase
 </code></pre>
 
 <h2>Running</h2>
