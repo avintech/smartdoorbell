@@ -5,6 +5,7 @@
  <li>Encryption for images: Ensures that captured images are stored securely.</li>
  <li>Facial Recognition using OpenCV Pretrained Classifier: Allows the system to recognize faces efficiently.</li>
  <li>Encrypted images are pushed to Firebase Storage Cloud</li>
+ <li>Authentication using email and password</li>
 </ul>
 
 <h2>Todo</h2>
