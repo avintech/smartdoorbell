@@ -32,7 +32,7 @@
 <p>Run the following commands to install the required packages:</p>
 <pre><code>sudo apt-get update
 pip install --upgrade pip
-pip install numpy Pillow opencv-python-headless cryptography opencv-contrib-python pyrebase
+pip install numpy Pillow opencv-python-headless cryptography opencv-contrib-python pyrebase4
 </code></pre>
 
 <p>Before running, please ask for service account json as i am unable to upload to GitHub. Put in project root folder.</p>
