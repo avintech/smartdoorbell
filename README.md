@@ -11,17 +11,9 @@
 <h2>Todo</h2>
 <ul>
  <li>Add motion sensor to only start facial recognition when motion is detected. This helps in saving resources.</li>
- <li>Implement remote notification using cloud services (e.g., Firebase Cloud Messaging) for real-time alerts.</li>
- <li>Develop a dashboard for data representation, which might include:
+  <li>Develop a mobile app, which might include:
    <ul>
-     <li>Live footage display.</li>
-     <li>Recognition status indication.</li>
-     <li>Display of historical data, such as unrecognized faces.</li>
-   </ul>
- </li>
- <li>Develop a mobile app, which might include:
-   <ul>
-     <li>Push notifications</li>
+     <li>Implement remote notification using cloud services (e.g., Firebase Cloud Messaging) for real-time alerts.</li>
      <li>Display of historical data, such as unrecognized faces.</li>
    </ul>
  </li>
