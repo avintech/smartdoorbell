@@ -4,18 +4,17 @@ import os
 import sys
 import pyrebase
 from cryptography.fernet import Fernet
+import json
 
-firebaseConfig = {
-				  'apiKey': "AIzaSyBeSc5ve2weKPGSk4Exgy5-VTBa4fGNPZQ",
-				  'authDomain': "smartdoorbell-32ea3.firebaseapp.com",
-				  'projectId': "smartdoorbell-32ea3",
-				  'databaseURL':"",
-				  'storageBucket': "smartdoorbell-32ea3.appspot.com",
-				  'messagingSenderId': "884254413846",
-				  'appId': "1:884254413846:web:bd13599244d7ec7abe5137",
-				  'measurementId': "G-BBW763ZCEZ",
-				  'serviceAccount': "smartdoorbell-32ea3-firebase-adminsdk-m8gtx-02c7f8f2b0.json"
-				}
+# Read the contents of the file
+with open("data.txt", "r") as file:
+    data = file.read()
+
+# Replace single quotes with double quotes to make it valid JSON
+data = data.replace("'", "\"")
+
+# Load the JSON data
+firebaseConfig = json.loads(data)
 			  
 firebase = pyrebase.initialize_app(firebaseConfig)
 auth = firebase.auth()
