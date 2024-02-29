@@ -1,80 +1,124 @@
 import cv2
 import numpy as np
 import pickle
-from time import time  # Use time to track how long the face has been unrecognized
+import time  # Use time to track how long the face has been unrecognized
+import pyrebase
+import os
 
-# Load the label dictionary
-with open('labels', 'rb') as label_file:
-    label_dict = pickle.load(label_file)
+firebaseConfig = {
+				  'apiKey': "AIzaSyBeSc5ve2weKPGSk4Exgy5-VTBa4fGNPZQ",
+				  'authDomain': "smartdoorbell-32ea3.firebaseapp.com",
+				  'projectId': "smartdoorbell-32ea3",
+				  'databaseURL':"",
+				  'storageBucket': "smartdoorbell-32ea3.appspot.com",
+				  'messagingSenderId': "884254413846",
+				  'appId': "1:884254413846:web:bd13599244d7ec7abe5137",
+				  'measurementId': "G-BBW763ZCEZ",
+				  'serviceAccount': "smartdoorbell-32ea3-firebase-adminsdk-m8gtx-02c7f8f2b0.json"
+				}
+			  
+firebase = pyrebase.initialize_app(firebaseConfig)
+auth = firebase.auth()
+storage = firebase.storage()
+def login():
+	print("Log in...")
+	email=input("Enter email: ")
+	password=input("Enter password: ")
+	try:
+		login = auth.sign_in_with_email_and_password(email, password)
+		print("Successfully logged in!")
+		print(auth.get_account_info(login['idToken']))
+		uuid = auth.get_account_info(login['idToken'])['users'][0]['localId']
+		print(uuid)
+		return [True,uuid]
+	except Exception as error:
+		print("Firebase error: ", error)
+		return [False]
 
-# Initialize face detection and recognition models
-face_cascade_classifier = cv2.CascadeClassifier("haarcascade_frontalface_default.xml")
-face_recognizer = cv2.face.LBPHFaceRecognizer_create()
-face_recognizer.read("trainer.yml")
-font_style = cv2.FONT_HERSHEY_SIMPLEX
 
-# Initialize camera
-camera = cv2.VideoCapture(0)
-camera.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
-camera.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
+login = login()
+if login[0] == True:
+	uuid = login[1]
+	# Load the label dictionary
+	with open('labels', 'rb') as label_file:
+		label_dict = pickle.load(label_file)
 
-recognition_threshold = 70  # Confidence threshold for recognizing a face
-unrecognized_time_threshold = 5  # Time in seconds after which to show "TOO LONG" message
-unrecognized_faces = {}  # Dictionary to keep track of unrecognized faces and their first appearance time
+	# Initialize face detection and recognition models
+	face_cascade_classifier = cv2.CascadeClassifier("haarcascade_frontalface_default.xml")
+	face_recognizer = cv2.face.LBPHFaceRecognizer_create()
+	face_recognizer.read("trainer.yml")
+	font_style = cv2.FONT_HERSHEY_SIMPLEX
 
-while True:
-    # Capture frame-by-frame
-    ret, frame = camera.read()
-    if not ret:
-        break
+	# Initialize camera
+	camera = cv2.VideoCapture(0)
+	camera.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
+	camera.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
 
-    # Convert frame to grayscale
-    gray_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-    
-    # Detect faces in the frame
-    faces = face_cascade_classifier.detectMultiScale(gray_frame, scaleFactor=1.5, minNeighbors=5)
+	recognition_threshold = 70  # Confidence threshold for recognizing a face
+	unrecognized_time_threshold = 5  # Time in seconds after which to show "TOO LONG" message
+	unrecognized_faces = {}  # Dictionary to keep track of unrecognized faces and their first appearance time
 
-    for (x, y, width, height) in faces:
-        # Region of interest in grayscale for face recognition
-        roi_gray = gray_frame[y:y+height, x:x+width]
-        
-        # Recognize face
-        face_id, confidence = face_recognizer.predict(roi_gray)
+	while True:
+		# Capture frame-by-frame
+		ret, frame = camera.read()
+		if not ret:
+			break
 
-        if confidence <= recognition_threshold:
-            # Loop through label dictionary to find the recognized face label
-            recognized_name = "Unknown"
-            for name, id_number in label_dict.items():
-                if id_number == face_id:
-                    recognized_name = name
-            color = (0, 255, 0)  # Green color for recognized faces
+		# Convert frame to grayscale
+		gray_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+		
+		# Detect faces in the frame
+		faces = face_cascade_classifier.detectMultiScale(gray_frame, scaleFactor=1.5, minNeighbors=5)
 
-            # If face is recognized, remove it from unrecognized_faces if it's there
-            unrecognized_faces.pop(face_id, None)
-        else:
-            recognized_name = "Unknown"
-            color = (0, 0, 255)  # Red color for unrecognized faces
+		for (x, y, width, height) in faces:
+			# Region of interest in grayscale for face recognition
+			roi_gray = gray_frame[y:y+height, x:x+width]
+			
+			# Recognize face
+			face_id, confidence = face_recognizer.predict(roi_gray)
 
-            # Update the unrecognized_faces dictionary
-            if face_id not in unrecognized_faces:
-                unrecognized_faces[face_id] = time()
-            else:
-                # Check how long the face has been unrecognized
-                duration_unrecognized = time() - unrecognized_faces[face_id]
-                if duration_unrecognized > unrecognized_time_threshold:
-                    cv2.putText(frame, "TOO LONG", (x, y - 20), font_style, 1, (0, 0, 255), 2, cv2.LINE_AA)
+			if confidence <= recognition_threshold:
+				# Loop through label dictionary to find the recognized face label
+				recognized_name = ""
+				for name, id_number in label_dict.items():
+					if id_number == face_id:
+						recognized_name = name
+				color = (0, 255, 0)  # Green color for recognized faces
+				print("hello, ", recognized_name)
+				# If face is recognized, remove it from unrecognized_faces if it's there
+				unrecognized_faces.pop(face_id, None)
+			else:
+				recognized_name = "Unknown"
+				color = (0, 0, 255)  # Red color for unrecognized faces
 
-        # Display the rectangle and name
-        cv2.rectangle(frame, (x, y), (x+width, y+height), color, 2)
-        cv2.putText(frame, recognized_name + " {:.2f}".format(confidence), (x, y), font_style, 1, color, 2, cv2.LINE_AA)
+				# Update the unrecognized_faces dictionary
+				if face_id not in unrecognized_faces:
+					unrecognized_faces[face_id] = time.time()
+				else:
+					# Check how long the face has been unrecognized
+					duration_unrecognized = time.time() - unrecognized_faces[face_id]
+					if duration_unrecognized > unrecognized_time_threshold:
+						cv2.putText(frame, "TOO LONG", (x, y - 20), font_style, 1, (0, 0, 255), 2, cv2.LINE_AA)
+						print("i dont know you")
+						#upload into unknown face
+						current_time_s = time.time()
+						current_struct_time = time.localtime(current_time_s)
+						formatted_datetime = str(time.strftime("%d%m%Y_%H",current_struct_time))
+						dirName = uuid+"/unknownfaces/"+formatted_datetime+"/"
+						if not os.path.exists(dirName):
+							os.makedirs(dirName)
+						print(formatted_datetime)
+						showPic = cv2.imwrite(uuid+"/unknownfaces/"+formatted_datetime+"/"+str(face_id)+".jpg",frame)
+						print(showPic)
+						storage.child(uuid+"/unknownfaces/"+formatted_datetime+"/"+str(face_id)+".jpg").put(uuid+"/unknownfaces/"+formatted_datetime+"/"+str(face_id)+".jpg")
+		
+			#Display the rectangle and name
+			cv2.rectangle(frame, (x, y), (x+width, y+height), color, 2)
+			cv2.putText(frame, recognized_name + " {:.2f}".format(confidence), (x, y), font_style, 1, color, 2, cv2.LINE_AA)
+		cv2.imshow('frame', frame)
+	
+		if cv2.waitKey(1) & 0xFF == ord('q'):
+			break
 
-    # Display the resulting frame
-    cv2.imshow('frame', frame)
-    
-    # Break the loop if 'ESC' is pressed
-    if cv2.waitKey(1) & 0xFF == 27:
-        break
-
-# Release the camera and close all OpenCV windows
-camera.release()
-cv2.destroyAllWindows()
+	camera.release()
+	cv2.destroyAllWindows()

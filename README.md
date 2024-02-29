@@ -2,8 +2,9 @@
 
 <h2>Features</h2>
 <ul>
- <li>AES Encryption for images: Ensures that captured images are stored securely.</li>
+ <li>Encryption for images: Ensures that captured images are stored securely.</li>
  <li>Facial Recognition using OpenCV Pretrained Classifier: Allows the system to recognize faces efficiently.</li>
+ <li>Encrypted images are pushed to Firebase Storage Cloud</li>
 </ul>
 
 <h2>Todo</h2>
@@ -38,7 +39,7 @@
 <p>Run the following commands to install the required packages:</p>
 <pre><code>sudo apt-get update
 pip install --upgrade pip
-pip install numpy Pillow opencv-python-headless pycryptodome opencv-contrib-python pyrebase
+pip install numpy Pillow opencv-python-headless cryptography opencv-contrib-python pyrebase
 </code></pre>
 
 <h2>Running</h2>
