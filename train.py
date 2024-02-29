@@ -22,11 +22,11 @@ firebaseConfig = json.loads(data)
 firebase = pyrebase.initialize_app(firebaseConfig)
 auth = firebase.auth()
 storage = firebase.storage()    
+db = firebase.database()
 def login():
 	print("Log in...")
 	email=input("Enter email: ")
 	password=input("Enter password: ")
-	
 	try:
 		login = auth.sign_in_with_email_and_password(email, password)
 		print("Successfully logged in!")
@@ -79,19 +79,21 @@ if login[0] == True:
 	os.makedirs(imageDir)
 	print("Directory '",imageDir,"' created successfully.")
 	try:
-		all_files = storage.child(uuid+"/images/").list_files()
-		#print("all folders: ",all_folders)
-		for file in all_files:
-			print("file: ",file.self_link)
-			response = requests.get(file.media_link)
-			if response.status_code == 200:
-				directory = os.path.dirname(file.name)
-				os.makedirs(directory, exist_ok=True)
-				with open(file.name,'wb') as file:
-					file.write(response.content)
-					print("downloaded ",file.name," successfully!")			
+		all_recognised_face_name = db.child(uuid).child("images").get()
+		for recognised_face_name in all_recognised_face_name.val():
+			all_keys = db.child(uuid).child("images").child(recognised_face_name).get()
+			for key in all_keys.each():
+				data = key.val()
+				response = requests.get(data['url'])
+				if response.status_code == 200:
+					directory = os.path.dirname(data['name'])
+					os.makedirs(directory, exist_ok=True)
+					with open(data['name'],'wb') as file:
+						file.write(response.content)
+						print("downloaded ",file.name," successfully!")			
 	except Exception as error:
 		print(error)
+		exit()
 	
 	currentId = 1
 	labelIds = {}

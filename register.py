@@ -19,6 +19,7 @@ firebaseConfig = json.loads(data)
 firebase = pyrebase.initialize_app(firebaseConfig)
 auth = firebase.auth()
 storage = firebase.storage()
+db = firebase.database()
 def login():
 	print("Log in...")
 	email=input("Enter email: ")
@@ -29,7 +30,7 @@ def login():
 		print(auth.get_account_info(login['idToken']))
 		uuid = auth.get_account_info(login['idToken'])['users'][0]['localId']
 		print(uuid)
-		return [True,uuid]
+		return [True,uuid,login['idToken']]
 	except Exception as error:
 		print("Firebase error: ", error)
 		return [False]
@@ -86,7 +87,12 @@ if login[0] == True:
 			encrypted_file = encrypt_file(b'yDrHaC4eMEzMchThHjlHGbpqkQyRsfr-xr0_ru94nUY=', fileName)  # Encrypt the file
 			print(encrypted_file)
 			#upload encrypted file
-			storage.child(encrypted_file).put(encrypted_file)
+			storage.child(encrypted_file).put(encrypted_file, login[2])
+			file_url = storage.child(encrypted_file).get_url(login[2])
+			print(file_url)
+			data = {"name": str(encrypted_file), "url": str(file_url)}
+			print(data)
+			db.child(uuid).child("images").child(name).push(data)
 			print(encrypted_file)
 			cv2.imshow("face", roiGray)
 			cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 2)
