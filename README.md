@@ -35,7 +35,7 @@ pip install --upgrade pip
 pip install numpy Pillow opencv-python-headless cryptography opencv-contrib-python pyrebase4
 </code></pre>
 
-<p>Before running, please ask for service account json as i am unable to upload to GitHub. Put in project root folder.</p>
+<p>Before running, please ask for <code>service account json</code> and <code>data.txt</code> as i am unable to upload to GitHub. Put in project root folder.</p>
 
 <h2>Running</h2>
 <ol>
