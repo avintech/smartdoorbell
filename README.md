@@ -17,6 +17,12 @@
      <li>Display of historical data, such as unrecognized faces.</li>
    </ul>
  </li>
+ <li>Develop a mobile app, which might include:
+   <ul>
+     <li>Push notifications</li>
+     <li>Display of historical data, such as unrecognized faces.</li>
+   </ul>
+ </li>
  <li>Implement a system to "ring" the doorbell when certain conditions are met (e.g., an unrecognized face is detected).</li>
  <li>Conduct thorough testing under different conditions, such as varying lighting conditions and different faces, to ensure reliability and robustness.</li>
 </ul>
