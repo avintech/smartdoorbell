@@ -5,6 +5,7 @@ import time  # Use time to track how long the face has been unrecognized
 import pyrebase
 import os
 import json
+from datetime import datetime
 
 # Read the contents of the file
 with open("data.txt", "r") as file:
@@ -35,6 +36,8 @@ def login():
 		print("Firebase error: ", error)
 		return [False]
 
+def get_timestamp():
+    return datetime.now().timestamp()
 
 login = login()
 if login[0] == True:
@@ -116,9 +119,13 @@ if login[0] == True:
 							print(showPic)
 							storage.child(output_filename).put(output_filename,login[2])
 							file_url = storage.child(output_filename).get_url(login[2])
-							data = {"name": output_filename, "url": str(file_url)}
-							print(data)
-							db.child(uuid).child("unknownfaces").child(formatted_datetime).child(formatted_minute).set(data)
+							
+							today_date = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
+							date_unix_timestamp = int(today_date.timestamp())
+
+							data = {"name": output_filename, "url": str(file_url), 'timestamp': get_timestamp()}
+							
+							db.child(uuid).child("unknownfaces").child(date_unix_timestamp).set(data)
 		
 			#Display the rectangle and name
 			cv2.rectangle(frame, (x, y), (x+width, y+height), color, 2)
