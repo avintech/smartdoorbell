@@ -37,7 +37,7 @@ def login():
 		return [False]
 
 def get_timestamp():
-    return datetime.now().timestamp()
+    return int(datetime.now().timestamp())
 
 login = login()
 if login[0] == True:
@@ -123,9 +123,9 @@ if login[0] == True:
 							today_date = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
 							date_unix_timestamp = int(today_date.timestamp())
 
-							data = {"name": output_filename, "url": str(file_url), 'timestamp': get_timestamp()}
+							data = {"name": output_filename, "url": str(file_url)}
 							
-							db.child(uuid).child("unknownfaces").child(date_unix_timestamp).set(data)
+							db.child(uuid).child("unknownfaces").child(date_unix_timestamp).child(get_timestamp()).set(data)
 		
 			#Display the rectangle and name
 			cv2.rectangle(frame, (x, y), (x+width, y+height), color, 2)
