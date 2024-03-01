@@ -105,8 +105,8 @@ if login[0] == True:
 							#upload into unknown face
 							current_time_s = time.time()
 							current_struct_time = time.localtime(current_time_s)
-							formatted_datetime = str(time.strftime("%d%m%Y_%H",current_struct_time))
-							formatted_minute = str(time.strftime("%M",current_struct_time))
+							formatted_datetime = str(time.strftime("%d%m%Y",current_struct_time))
+							formatted_minute = str(time.strftime("%H%M",current_struct_time))
 							dirName = uuid+"/unknownfaces/"+formatted_datetime+"/"
 							if not os.path.exists(dirName):
 								os.makedirs(dirName)
