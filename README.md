@@ -6,17 +6,17 @@
  <li>Facial Recognition using OpenCV Pretrained Classifier: Allows the system to recognize faces efficiently.</li>
  <li>Encrypted images are pushed to Firebase Storage Cloud</li>
  <li>Authentication using email and password</li>
+ <li>A cross-platform mobile app that includes:
+   <ul>
+     <li>Implement remote notification using cloud services for real-time alerts.(Android Only)</li>
+     <li>Display of historical data, such as unrecognized faces.</li>
+   </ul>
+ </li>
 </ul>
 
 <h2>Todo</h2>
 <ul>
  <li>Add motion sensor to only start facial recognition when motion is detected. This helps in saving resources.</li>
-  <li>Develop a mobile app, which might include:
-   <ul>
-     <li>Implement remote notification using cloud services (e.g., Firebase Cloud Messaging) for real-time alerts.</li>
-     <li>Display of historical data, such as unrecognized faces.</li>
-   </ul>
- </li>
  <li>Implement a system to "ring" the doorbell when certain conditions are met (e.g., an unrecognized face is detected).</li>
  <li>Conduct thorough testing under different conditions, such as varying lighting conditions and different faces, to ensure reliability and robustness.</li>
 </ul>
