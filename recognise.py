@@ -6,6 +6,8 @@ import pyrebase
 import os
 import json
 from datetime import datetime
+import requests
+import json
 
 # Read the contents of the file
 with open("data.txt", "r") as file:
@@ -105,7 +107,8 @@ if login[0] == True:
 						cv2.putText(frame, "TOO LONG", (x, y - 20), font_style, 1, (0, 0, 255), 2, cv2.LINE_AA)
 						if time.time() - last_upload_time > 60:
 							last_upload_time = time.time()  # Update last upload time
-							#upload into unknown face
+
+							#upload image into database
 							current_time_s = time.time()
 							current_struct_time = time.localtime(current_time_s)
 							formatted_datetime = str(time.strftime("%d%m%Y",current_struct_time))
@@ -113,19 +116,38 @@ if login[0] == True:
 							dirName = uuid+"/unknownfaces/"+formatted_datetime+"/"
 							if not os.path.exists(dirName):
 								os.makedirs(dirName)
-							print(formatted_datetime)
 							output_filename = uuid+"/unknownfaces/"+formatted_datetime+"/"+formatted_minute+".jpg"
 							showPic = cv2.imwrite(output_filename,frame)
-							print(showPic)
+							#upload to Firebase Storage
 							storage.child(output_filename).put(output_filename,login[2])
 							file_url = storage.child(output_filename).get_url(login[2])
-							
 							today_date = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
 							date_unix_timestamp = int(today_date.timestamp())
-
 							data = {"name": output_filename, "url": str(file_url)}
-							
+							#upload to Firebase Database
 							db.child(uuid).child("unknownfaces").child(date_unix_timestamp).child(get_timestamp()).set(data)
+
+							#create push notification to application
+							try:
+								with open('server.txt', 'r') as file:
+									server_key = file.read()
+								url = "https://fcm.googleapis.com/fcm/send"
+								recipient = db.child(uuid).child("token").get().val()
+								payload = json.dumps({
+								"to": recipient,
+								"notification": {
+									"body": "Unknown person at your door!",
+									"title": "Enter to view."
+								}
+								})
+								headers = {
+									'Content-Type': 'application/json',
+									'Authorization': 'key='+server_key
+								}
+								response = requests.request("POST", url, headers=headers, data=payload)
+							except Exception as e:
+								print("Error: ",e)
+							
 		
 			#Display the rectangle and name
 			cv2.rectangle(frame, (x, y), (x+width, y+height), color, 2)
