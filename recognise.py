@@ -8,7 +8,28 @@ import json
 from datetime import datetime
 import requests
 import json
+import torch
+import torchvision
 
+
+# Load the YOLOv5 model outside of your main loop to avoid reloading it for each frame
+model = torch.hub.load('ultralytics/yolov5', 'yolov5s', pretrained=True)
+
+	
+# Initialize camera using 'camera' variable as you have been doing
+camera = cv2.VideoCapture(0)  # Use the correct camera index
+
+#Function to check for camera obstruction
+def is_camera_covered(frame, darkness_threshold=50, uniformity_threshold=0.5):
+	gray_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+	average_brightness = np.mean(gray_frame)
+	unique, counts = np.unique(gray_frame, return_counts=True)
+	uniformity = max(counts) / sum(counts) 
+	if average_brightness < darkness_threshold or uniformity > uniformity_threshold: 
+		return True
+	else: 
+		return False
+	
 # Read the contents of the file
 with open("data.txt", "r") as file:
 	data = file.read()
@@ -23,10 +44,13 @@ firebase = pyrebase.initialize_app(firebaseConfig)
 auth = firebase.auth()
 storage = firebase.storage()
 db = firebase.database()
+	
 def login():
 	print("Log in...")
-	email=input("Enter email: ")
-	password=input("Enter password: ")
+	#email=input("Enter email: ")
+	#password=input("Enter password: ")
+	email = 'faithlimzx@gmail.com'
+	password = '123456'
 	try:
 		login = auth.sign_in_with_email_and_password(email, password)
 		print("Successfully logged in!")
@@ -64,12 +88,29 @@ if login[0] == True:
 	unrecognized_faces = {}  # Dictionary to keep track of unrecognized faces and their first appearance time
 	last_upload_time = 0  # Initialize last upload time
 
+		
 	while True:
+
 		# Capture frame-by-frame
 		ret, frame = camera.read()
 		if not ret:
 			break
+		
+		results = model(frame)
+		frame_with_boxes = results.render()[0]
 
+	
+		# Display the frame with bounding boxes
+		cv2.imshow('Frame', frame_with_boxes)
+
+		
+
+		if is_camera_covered(frame):
+			print("CAMERA IS OBSTRUCTED")
+			#if time.time() - last_upload_time >30:
+				#send_notification
+			
+		
 		# Convert frame to grayscale
 		gray_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
 		
@@ -147,6 +188,7 @@ if login[0] == True:
 								response = requests.request("POST", url, headers=headers, data=payload)
 							except Exception as e:
 								print("Error: ",e)
+				
 							
 		
 			#Display the rectangle and name
