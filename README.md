@@ -28,11 +28,10 @@
 <p>Activate python environment (Use this if you follow Lab 1 environment creation)</p>
 <pre><code>source myenv/bin/activate</code></pre>
 
-
 <p>Run the following commands to install the required packages:</p>
 <pre><code>sudo apt-get update
 pip install --upgrade pip
-pip install numpy Pillow opencv-python-headless cryptography opencv-contrib-python pyrebase4
+pip install numpy Pillow opencv-python-headless cryptography opencv-contrib-python pyrebase4 torch torchvision torchaudio
 </code></pre>
 
 <p>Before running, please ask for <code>service account json</code>,<code>server.txt</code> and <code>data.txt</code> as i am unable to upload to GitHub. Put in project root folder.</p>
