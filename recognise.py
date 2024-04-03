@@ -15,21 +15,9 @@ import torchvision
 # Load the YOLOv5 model outside of your main loop to avoid reloading it for each frame
 model = torch.hub.load('ultralytics/yolov5', 'yolov5s', pretrained=True)
 
-	
 # Initialize camera using 'camera' variable as you have been doing
 camera = cv2.VideoCapture(0)  # Use the correct camera index
 
-#Function to check for camera obstruction
-def is_camera_covered(frame, darkness_threshold=50, uniformity_threshold=0.5):
-	gray_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-	average_brightness = np.mean(gray_frame)
-	unique, counts = np.unique(gray_frame, return_counts=True)
-	uniformity = max(counts) / sum(counts) 
-	if average_brightness < darkness_threshold or uniformity > uniformity_threshold: 
-		return True
-	else: 
-		return False
-	
 # Read the contents of the file
 with open("data.txt", "r") as file:
 	data = file.read()
@@ -44,13 +32,72 @@ firebase = pyrebase.initialize_app(firebaseConfig)
 auth = firebase.auth()
 storage = firebase.storage()
 db = firebase.database()
+
+last_upload_time = 0  # Initialize last upload time
+
+#Function to check for camera obstruction
+def is_camera_covered(frame, darkness_threshold=50, uniformity_threshold=0.5):
+	gray_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+	average_brightness = np.mean(gray_frame)
+	unique, counts = np.unique(gray_frame, return_counts=True)
+	uniformity = max(counts) / sum(counts) 
+	if average_brightness < darkness_threshold or uniformity > uniformity_threshold: 
+		return True
+	else: 
+		return False
+
+def send_notification(last_upload_time, storage, db, uuid, login_2, frame, message):
+	if (time.time() - last_upload_time) > 60:
+		#upload image into database
+		try:
+			current_time_s = time.time()
+			current_struct_time = time.localtime(current_time_s)
+			formatted_datetime = str(time.strftime("%d%m%Y",current_struct_time))
+			formatted_minute = str(time.strftime("%H%M",current_struct_time))
+			dirName = uuid+"/unknownfaces/"+formatted_datetime+"/"
+			if not os.path.exists(dirName):
+				os.makedirs(dirName)
+			output_filename = uuid+"/unknownfaces/"+formatted_datetime+"/"+formatted_minute+".jpg"
+			cv2.imwrite(output_filename,frame)
+			#upload to Firebase Storage
+			storage.child(output_filename).put(output_filename,login_2)
+			file_url = storage.child(output_filename).get_url(login_2)
+			today_date = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
+			date_unix_timestamp = int(today_date.timestamp())
+			data = {"name": output_filename, "url": str(file_url)}
+			#upload to Firebase Database
+			db.child(uuid).child("unknownfaces").child(date_unix_timestamp).child(get_timestamp()).set(data)
+
+		#create push notification to application
+			with open('server.txt', 'r') as file:
+				server_key = file.read()
+			url = "https://fcm.googleapis.com/fcm/send"
+			recipient = db.child(uuid).child("token").get().val()
+			payload = json.dumps({
+			"to": recipient,
+			"notification": {
+				"body": message,
+				"title": "Enter to view."
+			}
+			})
+			headers = {
+				'Content-Type': 'application/json',
+				'Authorization': 'key='+server_key
+			}
+			response = requests.request("POST", url, headers=headers, data=payload)
+			print(response.text)
+		except Exception as e:
+			print("Error: ",e)
+		finally:
+			last_upload_time = time.time()  # Update last upload time
+			return last_upload_time
+	else:
+		return last_upload_time
 	
 def login():
 	print("Log in...")
-	#email=input("Enter email: ")
-	#password=input("Enter password: ")
-	email = 'faithlimzx@gmail.com'
-	password = '123456'
+	email=input("Enter email: ")
+	password=input("Enter password: ")
 	try:
 		login = auth.sign_in_with_email_and_password(email, password)
 		print("Successfully logged in!")
@@ -86,44 +133,35 @@ if login[0] == True:
 	recognition_threshold = 70  # Confidence threshold for recognizing a face
 	unrecognized_time_threshold = 5  # Time in seconds after which to show "TOO LONG" message
 	unrecognized_faces = {}  # Dictionary to keep track of unrecognized faces and their first appearance time
-	last_upload_time = 0  # Initialize last upload time
-
-		
+	
 	while True:
-
 		# Capture frame-by-frame
 		ret, frame = camera.read()
 		if not ret:
 			break
 		
 		results = model(frame)
-		frame_with_boxes = results.render()[0]
-
+		if results:
+			print(results)
+			if results.names[0] in ["knife","fork","scissors","baseball bat"]:
+				print("Dangerous item detected")
+				last_upload_time = send_notification(last_upload_time, storage, db, uuid, login[2], frame, "Dangeorous item detected")
+			results.render()[0]
 	
-		# Display the frame with bounding boxes
-		cv2.imshow('Frame', frame_with_boxes)
-
-		
-
 		if is_camera_covered(frame):
 			print("CAMERA IS OBSTRUCTED")
-			#if time.time() - last_upload_time >30:
-				#send_notification
-			
-		
+			last_upload_time = send_notification(last_upload_time, storage, db, uuid, login[2], frame, "Camera is obstructed")
+
 		# Convert frame to grayscale
 		gray_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
 		
 		# Detect faces in the frame
 		faces = face_cascade_classifier.detectMultiScale(gray_frame, scaleFactor=1.5, minNeighbors=5)
-
 		for (x, y, width, height) in faces:
 			# Region of interest in grayscale for face recognition
 			roi_gray = gray_frame[y:y+height, x:x+width]
-			
-			# Recognize face
+			# Face Recognition
 			face_id, confidence = face_recognizer.predict(roi_gray)
-
 			if confidence <= recognition_threshold:
 				# Loop through label dictionary to find the recognized face label
 				recognized_name = ""
@@ -146,56 +184,17 @@ if login[0] == True:
 					duration_unrecognized = time.time() - unrecognized_faces[face_id]
 					if duration_unrecognized > unrecognized_time_threshold:
 						cv2.putText(frame, "TOO LONG", (x, y - 20), font_style, 1, (0, 0, 255), 2, cv2.LINE_AA)
-						if time.time() - last_upload_time > 60:
-							last_upload_time = time.time()  # Update last upload time
-
-							#upload image into database
-							current_time_s = time.time()
-							current_struct_time = time.localtime(current_time_s)
-							formatted_datetime = str(time.strftime("%d%m%Y",current_struct_time))
-							formatted_minute = str(time.strftime("%H%M",current_struct_time))
-							dirName = uuid+"/unknownfaces/"+formatted_datetime+"/"
-							if not os.path.exists(dirName):
-								os.makedirs(dirName)
-							output_filename = uuid+"/unknownfaces/"+formatted_datetime+"/"+formatted_minute+".jpg"
-							showPic = cv2.imwrite(output_filename,frame)
-							#upload to Firebase Storage
-							storage.child(output_filename).put(output_filename,login[2])
-							file_url = storage.child(output_filename).get_url(login[2])
-							today_date = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
-							date_unix_timestamp = int(today_date.timestamp())
-							data = {"name": output_filename, "url": str(file_url)}
-							#upload to Firebase Database
-							db.child(uuid).child("unknownfaces").child(date_unix_timestamp).child(get_timestamp()).set(data)
-
-							#create push notification to application
-							try:
-								with open('server.txt', 'r') as file:
-									server_key = file.read()
-								url = "https://fcm.googleapis.com/fcm/send"
-								recipient = db.child(uuid).child("token").get().val()
-								payload = json.dumps({
-								"to": recipient,
-								"notification": {
-									"body": "Unknown person at your door!",
-									"title": "Enter to view."
-								}
-								})
-								headers = {
-									'Content-Type': 'application/json',
-									'Authorization': 'key='+server_key
-								}
-								response = requests.request("POST", url, headers=headers, data=payload)
-							except Exception as e:
-								print("Error: ",e)
-				
-							
+						try:
+							last_upload_time = send_notification(last_upload_time, storage, db, uuid, login[2], frame, "Unknown person at your door!")
+						except Exception as ex:
+							print(ex)
 		
 			#Display the rectangle and name
 			cv2.rectangle(frame, (x, y), (x+width, y+height), color, 2)
 			cv2.putText(frame, recognized_name + " {:.2f}".format(confidence), (x, y), font_style, 1, color, 2, cv2.LINE_AA)
+		
 		cv2.imshow('frame', frame)
-	
+		last_upload_time = last_upload_time
 		if cv2.waitKey(1) & 0xFF == ord('q'):
 			break
 
