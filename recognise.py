@@ -142,7 +142,6 @@ if login[0] == True:
 		
 		results = model(frame)
 		if results:
-			print(results)
 			if results.names[0] in ["knife","fork","scissors","baseball bat"]:
 				print("Dangerous item detected")
 				last_upload_time = send_notification(last_upload_time, storage, db, uuid, login[2], frame, "Dangeorous item detected")
