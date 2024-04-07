@@ -20,9 +20,9 @@
 <p>This project was tested on Python 3.9.19, you can follow these instructions to install.</p>
 <ol>
   <li>
-  <code>curl https://pyenv.run | bash
+  <pre><code>curl https://pyenv.run | bash
    pyenv install -v 3.9.19
-  </code>
+  </code></pre>
   </li>
   <li>Tea</li>
   <li>Milk</li>
