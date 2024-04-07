@@ -17,6 +17,18 @@
 </ul>
 
 <h2>Installation on Pi400</h2>
+<p>This project was tested on Python 3.9.19, you can follow these instructions to install.</p>
+<ol>
+  <li>
+  ```bash
+  curl https://pyenv.run | bash
+  pyenv install -v 3.9.19
+  ``` 
+  </li>
+  <li>Tea</li>
+  <li>Milk</li>
+</ol>
+
 <p>Activate python environment</p>
 <pre><code>source <yourenvname>/bin/activate</code></pre>
 
