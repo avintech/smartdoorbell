@@ -36,8 +36,7 @@ pyenv install -v 3.9.19 #This may take a while to install
 <p>Run the following commands to install the required packages:</p>
 <pre><code>sudo apt-get update
 pip install --upgrade pip
-pip install numpy Pillow cryptography opencv-contrib-python pyrebase4 torch torchvision torchaudio pandas
-</code></pre>
+pip install numpy Pillow cryptography opencv-contrib-python pyrebase4 torch torchvision torchaudio pandas</code></pre>
 
 <p>Before running, please ask for Google Credentials as i am unable to upload to GitHub for security reasons. Put in respective folders in the directory.</p>
 
