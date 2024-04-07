@@ -17,7 +17,7 @@
 </ul>
 
 <h2>Installation on Pi400</h2>
-<p>This project was tested on Python 3.9.19, you can follow these instructions to install.</p>
+<p>This project was tested on Python 3.9.19, you can follow these instructions to install. (This might take a while)</p>
 <pre><code>sudo apt update
 sudo apt upgrade -y
 sudo apt-get install -y build-essential tk-dev libncurses5-dev libncursesw5-dev libreadline6-dev libdb5.3-dev libgdbm-dev libsqlite3-dev libssl-dev libbz2-dev libexpat1-dev liblzma-dev zlib1g-dev libffi-dev
@@ -29,7 +29,7 @@ make -j 4
 sudo make altinstall
 python3.9 --version</code></pre>
 
-<p>Activate python environment</p>
+<p>Setting up python environment</p>
 <pre><code>source <yourenvname>/bin/activate</code></pre>
 
 <p>Activate python environment (Use this if you follow Lab 1 environment creation)</p>
