@@ -29,8 +29,7 @@ make -j 4
 sudo make altinstall
 python3.9 --version</code></pre>
 
-<p>Setting up python environment</p>
-<pre><code>source <yourenvname>/bin/activate</code></pre>
+<p>Paste Google Credentials into folder (Please request or set up your own Firebase)</p>
 
 <p>Activate python environment (Use this if you follow Lab 1 environment creation)</p>
 <pre><code>source myenv/bin/activate</code></pre>
