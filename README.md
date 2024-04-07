@@ -21,7 +21,7 @@
 <ol>
   <li>Run in Terminal</li>
   <pre><code>curl https://pyenv.run | bash
- pyenv install -v 3.9.19</code></pre>
+pyenv install -v 3.9.19</code></pre>
   <li>Tea</li>
   <li>Milk</li>
 </ol>
