@@ -18,14 +18,16 @@
 
 <h2>Installation on Pi400</h2>
 <p>This project was tested on Python 3.9.19, you can follow these instructions to install.</p>
-<ol>
-  <li>Run in Terminal</li>
-  <pre><code>curl https://pyenv.run | bash
-pyenv install -v 3.9.19 #This may take a while to install
-  </code></pre>
-  <li>Tea</li>
-  <li>Milk</li>
-</ol>
+<pre><code>sudo apt update
+sudo apt upgrade -y
+sudo apt-get install -y build-essential tk-dev libncurses5-dev libncursesw5-dev libreadline6-dev libdb5.3-dev libgdbm-dev libsqlite3-dev libssl-dev libbz2-dev libexpat1-dev liblzma-dev zlib1g-dev libffi-dev
+wget https://www.python.org/ftp/python/3.9.19/Python-3.9.19.tgz
+tar -xf Python-3.9.19.tgz
+cd Python-3.9.19
+./configure --enable-optimizations
+make -j 4
+sudo make altinstall
+python3.9 --version</code></pre>
 
 <p>Activate python environment</p>
 <pre><code>source <yourenvname>/bin/activate</code></pre>
