@@ -47,7 +47,7 @@ def is_camera_covered(frame, darkness_threshold=50, uniformity_threshold=0.5):
 		return False
 
 def send_notification(last_upload_time, storage, db, uuid, login_2, frame, message):
-	if (time.time() - last_upload_time) > 60:
+	if (time.time() - last_upload_time) > 15:
 		#upload image into database
 		try:
 			current_time_s = time.time()
@@ -141,11 +141,23 @@ if login[0] == True:
 			break
 		
 		results = model(frame)
-		if results:
-			if results.names[0] in ["knife","fork","scissors","baseball bat"]:
-				print("Dangerous item detected")
-				last_upload_time = send_notification(last_upload_time, storage, db, uuid, login[2], frame, "Dangeorous item detected")
+
+		detected_objects = results.pandas().xyxy[0]
+
+		items_to_check = ["knife","fork","scissors","baseball bat"]
+		detected_from_list = []
+
+		# Check each item in your list against the detected objects
+		for item in items_to_check:
+			if any(detected_objects['name'].str.contains(item)):
+				detected_from_list.append(item)
+				
+		if detected_from_list:
+			print(f"Items detected from your list: {', '.join(detected_from_list)}")
+			last_upload_time = send_notification(last_upload_time, storage, db, uuid, login[2], frame, "Dangeorous item detected")
 			results.render()[0]
+		else:
+			print("No Dangerous Items")
 	
 		if is_camera_covered(frame):
 			print("CAMERA IS OBSTRUCTED")
