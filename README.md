@@ -19,11 +19,9 @@
 <h2>Installation on Pi400</h2>
 <p>This project was tested on Python 3.9.19, you can follow these instructions to install.</p>
 <ol>
-  <li>
+  <li>Run in Terminal</li>
   <pre><code>curl https://pyenv.run | bash
-   pyenv install -v 3.9.19
-  </code></pre>
-  </li>
+  pyenv install -v 3.9.19</code></pre>
   <li>Tea</li>
   <li>Milk</li>
 </ol>
