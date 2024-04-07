@@ -32,7 +32,9 @@ python3.9 --version</code></pre>
 <p>Paste Google Credentials into folder (Please request or set up your own Firebase)</p>
 
 <p>Activate python environment (Use this if you follow Lab 1 environment creation)</p>
-<pre><code>source myenv/bin/activate</code></pre>
+<pre><code>sudo apt install python3-venv
+python3.9 -m venv smartdoorbell
+source smartdoorbell/bin/activate</code></pre>
 
 <p>Run the following commands to install the required packages:</p>
 <pre><code>sudo apt-get update
